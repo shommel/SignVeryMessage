@@ -1,7 +1,20 @@
 import logo from './logo.svg';
+import TrezorConnect from 'trezor-connect';
 import './App.css';
 
 function App() {
+
+  let v = TrezorConnect.init({
+    connectSrc: 'https://localhost:8088/',
+    lazyLoad: true, // this param will prevent iframe injection until TrezorConnect.method will be called
+    manifest: {
+        email: 'developer@xyz.com',
+        appUrl: 'http://your.application.com',
+    }
+  })
+
+  console.log(v)
+
   return (
     <div className="App">
       <header className="App-header">
