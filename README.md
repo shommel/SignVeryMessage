@@ -1,11 +1,23 @@
 # trezor-app
 
-## Current Milestones
+## Building application
+```zsh
+cd app
+yarn
+```
+
+## Running application
+```zsh
+cd app
+yarn start
+```
+
+### Current Milestones
 - retrieve xpub from user
 - Generate QR from user xpub
 
 
-## Remaining to-do:
+### Remaining to-do:
 - spruce up UI (currently as basic as I can make it)
 - add drop-down menu for selecting path to bitcoin account
 - generating one-time-link
