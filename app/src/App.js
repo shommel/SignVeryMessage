@@ -1,9 +1,12 @@
 import './App.css';
 import TrezorConnect from 'trezor-connect';
 import QRCode from 'qrcode.react';
-import React, {useState} from "react";
+import React, {useState} from 'react';
 
 function initTrezor() {
+  // initiate trezor device connection
+  // TODO: update connectSrc and manifest for production
+
   TrezorConnect.init({
   // connectSrc: 'https://localhost:8088/',
   lazyLoad: false,
@@ -19,22 +22,47 @@ function initTrezor() {
 }
 
 function App() {
+  initTrezor();
 
   const [showImage, setShowImage] = useState(false);
-  const [xpub, setxPub] = useState("")
-  initTrezor();
+  const [xpub, setxPub] = useState("");
+  const [qrCodeData, setQRCodeData] = useState("");
+
+  // mocked random message generation
+  const CHALLENGE_MESSAGE = "abc123"
+
   
   const getPublicKey = () => {
-      TrezorConnect.getPublicKey({
-        path: "m/49'/0'/0'",
-        coin: "btc"
-      }).then(resp => {
-          if (resp.success) {
-            console.log(resp.payload.xpub);
-            setShowImage(true);
-            setxPub(resp.payload.xpub)
-          }
-      })
+    TrezorConnect.getPublicKey({
+      path: "m/49'/0'/0'",
+      coin: "btc",
+    }).then(resp => {
+        if (resp.success) {
+          console.log(resp.payload);
+          setxPub(resp.payload.xpub)
+        }
+    })
+
+  }
+
+  const signMessage = () => {
+    TrezorConnect.signMessage({
+      path: "m/49'/0'/0'",
+      message: CHALLENGE_MESSAGE,
+    }).then(resp => {
+      if (resp.success) {
+        setQRCodeData(qrCodeData => (
+          {...qrCodeData, 
+            message: CHALLENGE_MESSAGE, 
+            address: resp.payload.address, 
+            signature: resp.payload.signature,
+            xpub: xpub
+          })
+        );
+        console.log(qrCodeData);
+        setShowImage(true);
+      }
+    })
   }
 
   return (
@@ -43,7 +71,8 @@ function App() {
         <h1>Trezor Integration</h1>
         <p>Please plug-in your Trezor!</p>
         <button onClick={getPublicKey}>Get xpub</button>
-        {showImage && <QRCode className="xPubQrCode" value={xpub}/>} 
+        <button onClick={signMessage}>Sign Message</button>
+        {showImage && <QRCode className="xPubQrCode" value={JSON.stringify(qrCodeData)}/>} 
       </header>
     </div>
   );
