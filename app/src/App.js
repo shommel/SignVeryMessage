@@ -34,11 +34,10 @@ function App() {
   
   const getPublicKey = () => {
     TrezorConnect.getPublicKey({
-      path: "m/49'/0'/0'",
+      path: "m/44'/0'/0'",
       coin: "btc",
     }).then(resp => {
         if (resp.success) {
-          console.log(resp.payload);
           setxPub(resp.payload.xpub)
         }
     })
@@ -47,7 +46,7 @@ function App() {
 
   const signMessage = () => {
     TrezorConnect.signMessage({
-      path: "m/49'/0'/0'",
+      path: "m/44'/0'/0'",
       message: CHALLENGE_MESSAGE,
     }).then(resp => {
       if (resp.success) {
@@ -59,7 +58,6 @@ function App() {
             xpub: xpub
           })
         );
-        console.log(qrCodeData);
         setShowImage(true);
       }
     })
