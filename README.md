@@ -2,24 +2,26 @@
 
 ## Building application
 ```zsh
-cd app
+cd frontend
 yarn
+cd ..
+cd backend
+pip3 install -r requirements.txt
+python3 manage.py migrate
 ```
 
 ## Running application
+
+### Frontend
+
 ```zsh
-cd app
+cd frontend
 yarn start
 ```
 
-### Current Milestones
-- retrieve xpub from user
-- Generate QR from user xpub
+### Frontend
 
-
-### Remaining to-do:
-- spruce up UI (currently as basic as I can make it)
-- add drop-down menu for selecting path to bitcoin account
-- generating one-time-link
-- updating README/docs
-- TBD...
+```zsh
+cd backend
+python3 manage.py runserver
+```
