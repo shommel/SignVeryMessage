@@ -1,5 +1,7 @@
-*.pyc
+.gitignore*.pyc
 *.swp
+*sqlite3
+env
 .DS_Store
 __pycache__
 node_modules/

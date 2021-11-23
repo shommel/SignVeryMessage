@@ -2,6 +2,7 @@ import './App.css';
 import TrezorConnect from 'trezor-connect';
 import QRCode from 'qrcode.react';
 import React, {useState} from 'react';
+import Axios from "axios";
 
 function initTrezor() {
   // initiate trezor device connection
@@ -30,13 +31,15 @@ function App() {
 
   // mocked random message generation
   const CHALLENGE_MESSAGE = "abc123"
+  const LEGACY_PATH = "m/44'/0'/0'"
 
   
   const getPublicKey = () => {
     TrezorConnect.getPublicKey({
-      path: "m/44'/0'/0'",
+      path: LEGACY_PATH,
       coin: "btc",
     }).then(resp => {
+        console.log(resp)
         if (resp.success) {
           setxPub(resp.payload.xpub)
         }
@@ -46,7 +49,7 @@ function App() {
 
   const signMessage = () => {
     TrezorConnect.signMessage({
-      path: "m/44'/0'/0'",
+      path: LEGACY_PATH,
       message: CHALLENGE_MESSAGE,
     }).then(resp => {
       if (resp.success) {
@@ -59,6 +62,16 @@ function App() {
           })
         );
         setShowImage(true);
+        Axios.post(`/api/message/`, {
+          'address': resp.payload.address,
+          'message': CHALLENGE_MESSAGE,
+          'signature': resp.payload.signature,
+        },
+        {
+          headers: {
+              "Content-Type": 'application/json'
+          }
+        }).then(res => console.log(res))
       }
     })
   }
@@ -69,6 +82,7 @@ function App() {
         <h1>Trezor Integration</h1>
         <p>Please plug-in your Trezor!</p>
         <button onClick={getPublicKey}>Get xpub</button>
+        <p></p>
         <button onClick={signMessage}>Sign Message</button>
         {showImage && <QRCode className="xPubQrCode" value={JSON.stringify(qrCodeData)}/>} 
       </header>
