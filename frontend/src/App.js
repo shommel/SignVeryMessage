@@ -6,12 +6,12 @@ import Axios from "axios";
 
 function initTrezor() {
   // initiate trezor device connection
-  // TODO: update connectSrc and manifest for production
 
   TrezorConnect.init({
-  // connectSrc: 'https://localhost:8088/',
+  // connectSrc: TODO: ADDRESS_OF_BACKEND_SERVER_RUNNING_TREZOR_CONNECT,
   lazyLoad: false,
     manifest: {
+      // TODO: change email and appUrl
       email: 'developer@xyz.com',
       appUrl: 'http://your.application.com',
     },
@@ -26,26 +26,14 @@ function App() {
   initTrezor();
 
   const LEGACY_PATH = "m/44'/0'/0'"
-
   const [showImage, setShowImage] = useState(false);
   const [xpub, setxPub] = useState("");
   const [qrCodeData, setQRCodeData] = useState("");
   const [challengeMessage, setChallengeMessage] = useState("");
 
-  
-  const getPublicKey = () => {
-    TrezorConnect.getPublicKey({
-      path: LEGACY_PATH,
-      coin: "btc",
-    }).then(resp => {
-        if (resp.success) {
-          setxPub(resp.payload.xpub)
-        }
-    })
-
-  }
 
   const getChallengeString = () => {
+    // ping backend for randomly generated challenge string
     Axios.get(`/api/random/`
     ).then(resp => {
       if (resp.status === 200) {
@@ -53,13 +41,28 @@ function App() {
       }
     });
   }
+  
+  const getPublicKey = () => {
+    // get legacy account public key (hidden or standard)
+    TrezorConnect.getPublicKey({
+      path: LEGACY_PATH,
+      coin: "btc",
+    }).then(resp => {
+      if (resp.success) {
+        setxPub(resp.payload.xpub)
+      }
+    })
+  }
 
   const signMessage = () => {
+    // use legacy account to sign challenge message
     TrezorConnect.signMessage({
       path: LEGACY_PATH,
       message: challengeMessage,
     }).then(resp => {
       if (resp.success) {
+
+        // pack qr code dictionary with retrieved values
         setQRCodeData(qrCodeData => (
           {...qrCodeData, 
             message: challengeMessage, 
@@ -68,7 +71,11 @@ function App() {
             xpub: xpub
           })
         );
+
+        // now that we have QR code data, make the component show up on page
         setShowImage(true);
+
+        // ping backend to verify user's signature
         Axios.post(`/api/verify/`, {
           'address': resp.payload.address,
           'message': challengeMessage,
@@ -78,7 +85,11 @@ function App() {
           headers: {
               "Content-Type": 'application/json'
           }
-        }).then(res => alert(res))
+        }).then(resp => {
+          if (resp.status === 200) {
+            alert("Signature Verified. xPub ownership confirmed. You can close this window now.");
+          }
+        })
       }
     })
   }
