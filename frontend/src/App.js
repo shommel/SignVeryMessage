@@ -25,13 +25,12 @@ function initTrezor() {
 function App() {
   initTrezor();
 
+  const LEGACY_PATH = "m/44'/0'/0'"
+
   const [showImage, setShowImage] = useState(false);
   const [xpub, setxPub] = useState("");
   const [qrCodeData, setQRCodeData] = useState("");
-
-  // mocked random message generation
-  const CHALLENGE_MESSAGE = "abc123"
-  const LEGACY_PATH = "m/44'/0'/0'"
+  const [challengeMessage, setChallengeMessage] = useState("");
 
   
   const getPublicKey = () => {
@@ -47,24 +46,33 @@ function App() {
 
   }
 
+  const getChallengeString = () => {
+    Axios.get(`/api/random/`
+    ).then(resp => {
+      if (resp.status === 200) {
+        setChallengeMessage(resp.data.message);
+      }
+    });
+  }
+
   const signMessage = () => {
     TrezorConnect.signMessage({
       path: LEGACY_PATH,
-      message: CHALLENGE_MESSAGE,
+      message: challengeMessage,
     }).then(resp => {
       if (resp.success) {
         setQRCodeData(qrCodeData => (
           {...qrCodeData, 
-            message: CHALLENGE_MESSAGE, 
+            message: challengeMessage, 
             address: resp.payload.address, 
             signature: resp.payload.signature,
             xpub: xpub
           })
         );
         setShowImage(true);
-        Axios.post(`/api/message/`, {
+        Axios.post(`/api/verify/`, {
           'address': resp.payload.address,
-          'message': CHALLENGE_MESSAGE,
+          'message': challengeMessage,
           'signature': resp.payload.signature,
         },
         {
@@ -81,6 +89,8 @@ function App() {
       <header className="App-header">
         <h1>Trezor Integration</h1>
         <p>Please plug-in your Trezor!</p>
+        <button onClick={getChallengeString}>Generate Random Message</button>
+        <p></p>
         <button onClick={getPublicKey}>Get xpub</button>
         <p></p>
         <button onClick={signMessage}>Sign Message</button>
