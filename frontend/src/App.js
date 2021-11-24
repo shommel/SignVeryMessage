@@ -38,7 +38,6 @@ function App() {
       path: LEGACY_PATH,
       coin: "btc",
     }).then(resp => {
-        console.log(resp)
         if (resp.success) {
           setxPub(resp.payload.xpub)
         }
@@ -79,7 +78,7 @@ function App() {
           headers: {
               "Content-Type": 'application/json'
           }
-        }).then(res => console.log(res))
+        }).then(res => alert(res))
       }
     })
   }
