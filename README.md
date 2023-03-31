@@ -1,4 +1,5 @@
-# trezor-app
+# SignVerifyMessage
+Prototype of a sign/verify message system application.
 
 ## Building application
 ```zsh
